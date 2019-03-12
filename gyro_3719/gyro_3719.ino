@@ -130,6 +130,14 @@ Servo shoulderServo;
 Servo elbowServo;
 Servo gripperServo;
 
+int roll; 
+int pitch;
+
+int baseVal; 
+int shoulderVal;
+int elbowVal;
+int gripperVal;
+
 
 // ================================================================
 // ===               INTERRUPT DETECTION ROUTINE                ===
@@ -147,18 +155,26 @@ void dmpDataReady() {
 // ================================================================
 
 void setup() {
+
+    // Declared the pin attachments of all servo motors
+    baseServo.attach(baseServoPin);
+    shoulderServo.attach(shoulderServoPin);
+    elbowServo.attach(elbowServoPin);
+    gripperServo.attach(gripperServoPin);
+
+  
     // join I2C bus (I2Cdev library doesn't do this automatically)
     #if I2CDEV_IMPLEMENTATION == I2CDEV_ARDUINO_WIRE
         Wire.begin();
         TWBR = 24; // 400kHz I2C clock (200kHz if CPU is 8MHz)
     #elif I2CDEV_IMPLEMENTATION == I2CDEV_BUILTIN_FASTWIRE
-        Fastwire::setup(400, true);
+        Fastwire::setup(200, true);
     #endif
 
     // initialize serial communication
     // (115200 chosen because it is required for Teapot Demo output, but it's
     // really up to you depending on your project)
-    Serial.begin(115200);
+    Serial.begin(9600);
     while (!Serial); // wait for Leonardo enumeration, others continue immediately
 
     // NOTE: 8MHz or slower host processors, like the Teensy @ 3.3v or Ardunio
@@ -282,16 +298,44 @@ void loop() {
             Serial.print("ypr\t");
             Serial.print(ypr[0] * 180/M_PI);
             Serial.print("\t");
+            pitch = ypr[1] * 180/M_PI;
             Serial.print(ypr[1] * 180/M_PI);
             Serial.print("\t");
+            roll = ypr[2] * 180/M_PI;
             Serial.println(ypr[2] * 180/M_PI);
-        #endif
-       
-    
-       
 
+        #endif
         // blink LED to indicate activity
         blinkState = !blinkState;
         digitalWrite(LED_PIN, blinkState);
+
+    baseVal = map(roll, -77, 76, 0, 160); 
+    
+    Serial.println("\n");
+    Serial.println("MAPPED VALUE: ");
+    Serial.println(baseVal);
+    baseServo.write(baseVal); // Set servo position according to scaled value 
+
+   
+
+        
+    
+    
+    
     }
+
+    
+/*
+    shoulderVal = map(analogRead(shoulderPot), 260, 1023, 0, 175); 
+    shoulderServo.write(shoulderPotVal);
+
+    elbowPotVal = map(analogRead(elbowPot), 0, 1023, 5, 175); 
+    elbowServo.write(elbowPotVal);
+
+    gripperPotVal = map(analogRead(gripperPot), 0, 1023, 0, 180); 
+    gripperServo.write(gripperPotVal);
+
+    */
+
+    
 }
