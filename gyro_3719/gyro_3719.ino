@@ -123,8 +123,8 @@ uint8_t teapotPacket[14] = { '$', 0x02, 0,0, 0,0, 0,0, 0,0, 0x00, 0x00, '\r', '\
 #define shoulderServoPin 5
 #define elbowServoPin 6
 #define gripperServoPin 9
-#define FLEX_PIN A0
-#define FLEX_PIN2 A1
+#define FLEX_PIN A1
+#define FLEX_PIN2 A0
 
 // Initializes all of the needed servo motors
 Servo baseServo;
@@ -320,22 +320,29 @@ void loop() {
             Serial.print(ypr[0] * 180/M_PI);
             Serial.print("\t");
             pitch = ypr[1] * 180/M_PI;
-            Serial.print(ypr[1] * 180/M_PI);
+            Serial.print(pitch);
             Serial.print("\t");
             roll = ypr[2] * 180/M_PI;
-            Serial.println(ypr[2] * 180/M_PI);
+            Serial.println(roll);
 
         #endif
         // blink LED to indicate activity
         blinkState = !blinkState;
         digitalWrite(LED_PIN, blinkState);
 
-    baseVal = map(roll, -77, 76, 0, 160); 
+    baseVal = map(roll, -77, 76, 90, 160); 
+
+    gripperVal = map(pitch, -69, 56, 5, 160);
+    gripperServo.write(gripperVal); // Set servo position according to scaled value 
+    Serial.println("GRIPPER VAL: ");
+    Serial.println(gripperVal);
     
-    Serial.println("\n");
-    Serial.println("MAPPED VALUE: ");
-    Serial.println(baseVal);
+    //Serial.println("\n");
+    //Serial.println("MAPPED VALUE: ");
+    //Serial.println(baseVal);
     baseServo.write(baseVal); // Set servo position according to scaled value 
+    Serial.println("BASE VAL: ");
+    Serial.println(baseVal);
 
     //flexors here
     // Read the ADC, and calculate voltage and resistance from it
@@ -348,19 +355,19 @@ void loop() {
     float flexV2 = flexADC2 * VCC / 1023.0;
     float flexR2 = R_DIV * (VCC / flexV2 - 1.0);
     
-    Serial.println("Resistance: " + String(flexR) + " ohms");
-    Serial.println("Resistance: " + String(flexR2) + " ohms");
+    //Serial.println("SHOULDER Resistance: " + String(flexR) + " ohms");
+    Serial.println("ELBOW Resistance: " + String(flexR2) + " ohms");
 
     // Use the calculated resistance to estimate the sensor's
     // bend angle:
     float angle = map(flexR, STRAIGHT_RESISTANCE, BEND_RESISTANCE,
-                   0, 170.0);
+                   30, 120.0);
     float angle2 = map(flexR2, STRAIGHT_RESISTANCE, BEND_RESISTANCE,
-                   0, 170.0);
+                   50, 140.0);
   
-    Serial.println("Bend: " + String(angle) + " degrees");
+    Serial.println("SHOULDER Bend: " + String(angle) + " degrees");
     Serial.println();
-    Serial.println("Bend: " + String(angle2) + " degrees");
+    Serial.println("ELBOW Bend: " + String(angle2) + " degrees");
     
     shoulderServo.write(angle);
     elbowServo.write(angle2); 

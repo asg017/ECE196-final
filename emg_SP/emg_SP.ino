@@ -27,7 +27,6 @@ void setup() {
 }
 
 void loop() {
-  counter++;
   
   // put your main code here, to run repeatedly:
 total=total-readings[readIndex]; //subtract last reading
@@ -46,14 +45,14 @@ Serial.println(average);
  
   if (average >= 230){
     isOn = 1; 
-    if (isOn == 1){
+  }
+  if (isOn == 1){
       baseServo.write(100);
       isOn++;
-    }
-    if (isOn == 2){
+  }
+  if (isOn == 2){
       baseServo.write(145);
       isOn = 0;
-    }
   }
   
 delay(1); //stability
